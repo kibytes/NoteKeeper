@@ -37,7 +37,7 @@ public class DataManager {
     public int createNewNote() {
         NoteInfo note = new NoteInfo(null, null, null);
         mNotes.add(note);
-        return mNotes.size() - 1;
+        return mNotes.size() - 1;  // JUnit test FAIL by returning out of index bounds exception ( )
     }
 
     public int findNote(NoteInfo note) {
