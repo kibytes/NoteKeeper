@@ -13,10 +13,10 @@ import android.widget.Spinner;
 import java.util.List;
 
 public class NoteActivity extends AppCompatActivity {
-    public static final String NOTE_POSITION = "com.jwhh.jim.notekeeper.NOTE_POSITION";
-    public static final String ORIGINAL_NOTE_COURSE_ID = "com.jwhh.jim.notekeeper.ORIGINAL_NOTE_COURSE_ID";
-    public static final String ORIGINAL_NOTE_TITLE = "com.jwhh.jim.notekeeper.ORIGINAL_NOTE_TITLE";
-    public static final String ORIGINAL_NOTE_TEXT = "com.jwhh.jim.notekeeper.ORIGINAL_NOTE_TEXT";
+    public static final String NOTE_POSITION = "com.apps.notekeeper.NOTE_POSITION";
+    public static final String ORIGINAL_NOTE_COURSE_ID = "com.apps.notekeeper.ORIGINAL_NOTE_COURSE_ID";
+    public static final String ORIGINAL_NOTE_TITLE = "com.apps.notekeeper.ORIGINAL_NOTE_TITLE";
+    public static final String ORIGINAL_NOTE_TEXT = "com.apps.notekeeper.ORIGINAL_NOTE_TEXT";
     public static final int POSITION_NOT_SET = -1;
     private NoteInfo mNote;
     private boolean mIsNewNote;
@@ -140,6 +140,19 @@ public class NoteActivity extends AppCompatActivity {
     }
 
     @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        MenuItem next = menu.findItem(R.id.action_next);
+        MenuItem prev = menu.findItem(R.id.action_previous);
+
+        int lastNoteIndex = DataManager.getInstance().getNotes().size() - 1;
+        next.setEnabled(mNotePosition < lastNoteIndex);
+        int firstNoteIndex = 0;
+        prev.setEnabled(mNotePosition > firstNoteIndex);
+
+        return super.onPrepareOptionsMenu(menu);
+    }
+
+    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle action bar item clicks here. The action bar will
         // automatically handle clicks on the Home/Up button, so long
@@ -153,9 +166,26 @@ public class NoteActivity extends AppCompatActivity {
         } else if (id == R.id.action_cancel) {
             mIsCancelling = true;
             finish();
+        } else if (id == R.id.action_next) {
+            moveNext(1);
+        } else if (id == R.id.action_previous) {
+            moveNext(0);
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    private void moveNext(int direction) {
+        saveNote();
+        if (direction == 0) {
+            --mNotePosition;
+        } else {
+            ++mNotePosition;
+        }
+        mNote = DataManager.getInstance().getNotes().get(mNotePosition);
+        displayNote(mSpinnerCourses, mTextNoteTitle, mTextNoteText);
+        //call this to allow system to call onPrepareOptionsMenu() so that menu items are redrawn
+        invalidateOptionsMenu();
     }
 
     private void sendEmail() {
