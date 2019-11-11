@@ -8,9 +8,17 @@ import android.os.Parcelable;
  */
 
 public final class NoteInfo implements Parcelable {
+    private int mId;
     private CourseInfo mCourse;
     private String mTitle;
     private String mText;
+
+    public NoteInfo(int id, CourseInfo course, String title, String text) {
+        mId = id;
+        mCourse = course;
+        mTitle = title;
+        mText = text;
+    }
 
     public NoteInfo(CourseInfo course, String title, String text) {
         mCourse = course;
@@ -31,6 +39,8 @@ public final class NoteInfo implements Parcelable {
     public void setCourse(CourseInfo course) {
         mCourse = course;
     }
+
+    public int getId() { return mId; }
 
     public String getTitle() {
         return mTitle;
