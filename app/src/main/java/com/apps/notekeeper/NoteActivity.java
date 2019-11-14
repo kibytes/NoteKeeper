@@ -8,6 +8,7 @@ import android.content.CursorLoader;
 
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import androidx.appcompat.app.AppCompatActivity;
@@ -22,6 +23,7 @@ import android.widget.EditText;
 import android.widget.Spinner;
 
 import static com.apps.notekeeper.NoteKeeperDatabaseContract.*;
+import com.apps.notekeeper.NoteKeeperProviderContract.Courses;
 
 public class NoteActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor> {
     public static final int LOADER_NOTES = 0;
@@ -67,8 +69,6 @@ public class NoteActivity extends AppCompatActivity implements LoaderManager.Loa
 
         mDbOpenHelper = new NoteKeeperOpenHelper(this);
         mSpinnerCourses = findViewById(R.id.spinner_courses);
-
-       // List<CourseInfo> courses = DataManager.getInstance().getCourses();
 
         mAdapterCourses = new SimpleCursorAdapter(this, android.R.layout.simple_spinner_item, null,
                 new String[] {CourseInfoEntry.COLUMN_COURSE_TITLE},
@@ -184,18 +184,12 @@ public class NoteActivity extends AppCompatActivity implements LoaderManager.Loa
     }
 
     private void saveNote() {
-        // String courseId = selectedCourseId();
-        // String noteTitle = mTextNoteTitle.getText().toString();
-        // String noteText = mTextNoteText.getText().toString();
         saveNoteToDatabase(selectedCourseId(),
                 mTextNoteTitle.getText().toString(),
                 mTextNoteText.getText().toString());
     }
 
     private String selectedCourseId() {
-        //int selectedPosition = mSpinnerCourses.getSelectedItemPosition();
-        //int courseIdPos = cursor.getColumnIndex(CourseInfoEntry.COLUMN_COURSE_ID);
-        //String courseId = cursor.getString(courseIdPos);
         Cursor cursor = mAdapterCourses.getCursor();
         cursor.moveToPosition(mSpinnerCourses.getSelectedItemPosition());
         return cursor.getString(cursor.getColumnIndex(CourseInfoEntry.COLUMN_COURSE_ID));
@@ -355,20 +349,14 @@ public class NoteActivity extends AppCompatActivity implements LoaderManager.Loa
 
     private CursorLoader createLoaderCourses() {
         mCoursesQueryFinished = false;
-        return new CursorLoader(this) {
-            @Override
-            public Cursor loadInBackground() {
-                SQLiteDatabase db = mDbOpenHelper.getReadableDatabase();
-
-                String[] courseColumns = {
-                        CourseInfoEntry.COLUMN_COURSE_TITLE,
-                        CourseInfoEntry.COLUMN_COURSE_ID,
-                        CourseInfoEntry._ID
-                };
-                return db.query(CourseInfoEntry.TABLE_NAME, courseColumns, null,
-                        null, null, null, CourseInfoEntry.COLUMN_COURSE_TITLE);
-            }
+        Uri uri = Courses.CONTENT_URI;
+        String[] courseColumns = {
+                Courses.COLUMN_COURSE_TITLE,
+                Courses.COLUMN_COURSE_ID,
+                Courses._ID
         };
+        return new CursorLoader(this, uri, courseColumns,
+                 null, null, Courses.COLUMN_COURSE_TITLE);
     }
 
     private CursorLoader createLoaderNotes() {
