@@ -29,7 +29,7 @@ public final class NoteKeeperProviderContract {
 
     public static final class Notes implements BaseColumns, NotesColumns, CoursesIdColumns, CoursesColumns {
         public static final String PATH = "notes";
-        public static final Uri CONTENT_URO = Uri.withAppendedPath(AUTHORITY_URI, PATH);
+        public static final Uri CONTENT_URI = Uri.withAppendedPath(AUTHORITY_URI, PATH);
         public static final String PATH_EXPANDED = "notes_expanded";
         public static final Uri CONTENT_EXPANDED_URI = Uri.withAppendedPath(AUTHORITY_URI, PATH_EXPANDED);
     }
