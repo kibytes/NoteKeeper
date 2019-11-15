@@ -3,40 +3,36 @@ package com.apps.notekeeper;
 import android.app.LoaderManager;
 import android.content.CursorLoader;
 import android.content.Loader;
-
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
-
 import com.apps.notekeeper.NoteKeeperDatabaseContract.CourseInfoEntry;
 import com.apps.notekeeper.NoteKeeperDatabaseContract.NoteInfoEntry;
 import com.apps.notekeeper.NoteKeeperProviderContract.Notes;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
+import android.os.Looper;
+import android.os.Handler;
+import android.os.StrictMode;
+import android.util.Log;
+import android.view.Gravity;
 import android.view.View;
-
 import androidx.core.view.GravityCompat;
 import androidx.appcompat.app.ActionBarDrawerToggle;
-
 import android.view.MenuItem;
-
 import com.google.android.material.navigation.NavigationView;
 import com.google.android.material.snackbar.Snackbar;
-
 import androidx.drawerlayout.widget.DrawerLayout;
-
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.preference.PreferenceManager;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-
 import android.view.Menu;
 import android.widget.TextView;
-
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity
@@ -50,18 +46,24 @@ public class MainActivity extends AppCompatActivity
     private GridLayoutManager mCourseLayoutManager;
     private NoteKeeperOpenHelper mDbOpenHelper;
 
+    private final String TAG = getClass().getSimpleName();
+
     @Override
     protected void onDestroy() {
+        Log.d(TAG, "************** onDestroy **************");
         mDbOpenHelper.close();
         super.onDestroy();
     }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        Log.d(TAG, "************** onCreate **************");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
+        enableStrictMode();
 
         mDbOpenHelper = new NoteKeeperOpenHelper(this);
         FloatingActionButton fab = findViewById(R.id.fab);
@@ -82,11 +84,34 @@ public class MainActivity extends AppCompatActivity
         initializeDisplayContent();
     }
 
+    private void enableStrictMode() {
+        if(BuildConfig.DEBUG){
+            StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder()
+                    .detectAll()
+                    .penaltyLog()
+                    .build();
+            StrictMode.setThreadPolicy(policy);
+        }
+    }
+
     @Override
     protected void onResume() {
+        Log.d(TAG, "************** onResume **************");
         super.onResume();
         getLoaderManager().restartLoader(LOADER_NOTES, null, this);
         updateNavHeader();
+        openDrawer();
+    }
+
+    private void openDrawer() {
+        Handler handler = new Handler(Looper.getMainLooper());
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                DrawerLayout drawer = findViewById(R.id.drawer_layout);
+                drawer.openDrawer(GravityCompat.START);
+            }
+        }, 1000);
     }
 
     private void loadNotes() {

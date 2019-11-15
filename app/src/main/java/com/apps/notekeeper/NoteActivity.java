@@ -20,13 +20,16 @@ import androidx.cursoradapter.widget.SimpleCursorAdapter;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.EditText;
+import android.widget.ProgressBar;
 import android.widget.Spinner;
 
 import com.apps.notekeeper.NoteKeeperDatabaseContract.CourseInfoEntry;
 import com.apps.notekeeper.NoteKeeperDatabaseContract.NoteInfoEntry;
 import com.apps.notekeeper.NoteKeeperProviderContract.Courses;
 import com.apps.notekeeper.NoteKeeperProviderContract.Notes;
+import com.google.android.material.snackbar.Snackbar;
 
 public class NoteActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor> {
     public static final int LOADER_NOTES = 0;
@@ -66,6 +69,7 @@ public class NoteActivity extends AppCompatActivity implements LoaderManager.Loa
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        Log.d(TAG, "************** onCreate **************");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_note);
         Toolbar toolbar = findViewById(R.id.toolbar);
@@ -87,13 +91,10 @@ public class NoteActivity extends AppCompatActivity implements LoaderManager.Loa
         } else {
             restoreOriginalNoteValues(savedInstanceState);
         }
-
         mTextNoteTitle = findViewById(R.id.text_note_title);
         mTextNoteText = findViewById(R.id.text_note_text);
-
         if(!mIsNewNote)
             getLoaderManager().initLoader(LOADER_NOTES, null, this);
-        Log.d(TAG, "onCreate");
     }
 
     private void loadCourseData() {
@@ -155,6 +156,7 @@ public class NoteActivity extends AppCompatActivity implements LoaderManager.Loa
         } else {
             saveNote();
         }
+        Log.d(TAG, "************** onPause **************");
     }
 
     private void deleteNoteFromDatabase() {
@@ -245,23 +247,63 @@ public class NoteActivity extends AppCompatActivity implements LoaderManager.Loa
         if(mIsNewNote) {
             createNewNote();
         }
-        Log.i(TAG, "mNoteId: " + mNoteId);
+        // Log.i(TAG, "mNoteId: " + mNoteId);
     }
 
     private void createNewNote() {
-        final ContentValues values = new ContentValues();
+        AsyncTask<ContentValues, Integer, Uri> task = new AsyncTask<ContentValues, Integer, Uri>() {
+            private ProgressBar mProgressBar;
+
+            @Override
+            protected void onPreExecute() {
+                mProgressBar = findViewById(R.id.progress_bar);
+                mProgressBar.setVisibility(View.VISIBLE);
+                mProgressBar.setProgress(1);
+            }
+
+            @Override
+            protected Uri doInBackground(ContentValues... contentValues) {
+                Log.d(TAG, "doInBackground - thread: " + Thread.currentThread().getId());
+                ContentValues insertValues = contentValues[0];
+                Uri rowUri = getContentResolver().insert(Notes.CONTENT_URI, insertValues);
+                simulateLongRunningWork();
+                publishProgress(2);
+                simulateLongRunningWork();
+                publishProgress(3);
+                return rowUri;
+            }
+
+            @Override
+            protected void onProgressUpdate(Integer... values) {
+                mProgressBar.setProgress(values[0]);
+            }
+
+            @Override
+            protected void onPostExecute(Uri uri) {
+                Log.d(TAG, "onPostExecute - thread: " + Thread.currentThread().getId());
+                mNoteUri = uri;
+                displaySnackbar(mNoteUri.toString());
+                mProgressBar.setVisibility(View.GONE);
+            }
+        };
+        ContentValues values = new ContentValues();
         values.put(NoteInfoEntry.COLUMN_COURSE_ID, "");
         values.put(NoteInfoEntry.COLUMN_NOTE_TITLE, "");
         values.put(NoteInfoEntry.COLUMN_NOTE_TEXT, "");
 
-        AsyncTask task = new AsyncTask() {
-            @Override
-            protected Object doInBackground(Object[] params) {
-                mNoteUri = getContentResolver().insert(Notes.CONTENT_URI, values);
-                return null;
-            }
-        };
-        task.execute();
+        Log.d(TAG, "Call to execute - thread: " + Thread.currentThread().getId());
+        task.execute(values);
+    }
+
+    private void displaySnackbar(String message) {
+        View view = findViewById(R.id.spinner_courses);
+        Snackbar.make(view, message, Snackbar.LENGTH_LONG).show();
+    }
+
+    private void simulateLongRunningWork() {
+        try {
+            Thread.sleep(2000);
+        } catch(Exception ex) {}
     }
 
     @Override
@@ -302,9 +344,17 @@ public class NoteActivity extends AppCompatActivity implements LoaderManager.Loa
             moveNext(1);
         } else if (id == R.id.action_previous) {
             moveNext(0);
+        } else if(id == R.id.action_set_reminder) {
+            showReminderNotification();
         }
-
         return super.onOptionsItemSelected(item);
+    }
+
+    private void showReminderNotification() {
+        String noteTitle = mTextNoteTitle.getText().toString();
+        String noteText = mTextNoteText.getText().toString();
+        int noteId = (int)ContentUris.parseId(mNoteUri);
+        NoteReminderNotification.notify(this, noteText, noteTitle, noteId);
     }
 
     private void moveNext(int direction) {
