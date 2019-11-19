@@ -1,6 +1,9 @@
 package com.apps.notekeeper;
 
 import android.app.LoaderManager;
+import android.app.job.JobInfo;
+import android.app.job.JobScheduler;
+import android.content.ComponentName;
 import android.content.CursorLoader;
 import android.content.Loader;
 import android.content.Intent;
@@ -15,9 +18,9 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import android.os.Looper;
 import android.os.Handler;
+import android.os.PersistableBundle;
 import android.os.StrictMode;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.View;
 import androidx.core.view.GravityCompat;
 import androidx.appcompat.app.ActionBarDrawerToggle;
@@ -39,6 +42,7 @@ public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener,
         LoaderManager.LoaderCallbacks<Cursor>  {
     public static final int LOADER_NOTES = 0;
+    public static final int NOTE_UPLOADER_JOB_ID = 1;
     private NoteRecyclerAdapter mNoteRecyclerAdapter;
     private RecyclerView mRecyclerItems;
     private LinearLayoutManager mNotesLayoutManager;
@@ -63,7 +67,7 @@ public class MainActivity extends AppCompatActivity
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        enableStrictMode();
+        // enableStrictMode();
 
         mDbOpenHelper = new NoteKeeperOpenHelper(this);
         FloatingActionButton fab = findViewById(R.id.fab);
@@ -100,7 +104,7 @@ public class MainActivity extends AppCompatActivity
         super.onResume();
         getLoaderManager().restartLoader(LOADER_NOTES, null, this);
         updateNavHeader();
-        openDrawer();
+        // openDrawer();
     }
 
     private void openDrawer() {
@@ -198,8 +202,31 @@ public class MainActivity extends AppCompatActivity
         if (id == R.id.action_settings) {
             startActivity(new Intent(this, SettingsActivity.class));
             return true;
+        } else if(id == R.id.action_backup_notes) {
+            backUpNotes();
+        } else if(id == R.id.action_upload_notes) {
+            // scheduleNoteUpload();
         }
         return super.onOptionsItemSelected(item);
+    }
+
+//    private void scheduleNoteUpload() {
+//        PersistableBundle extras = new PersistableBundle();
+//        extras.putString(NoteUploaderJobService.EXTRA_DATA_URI, Notes.CONTENT_URI.toString());
+//
+//        ComponentName componentName = new ComponentName(this, NoteUploaderJobService.class);
+//        JobInfo jobInfo = new JobInfo.Builder(NOTE_UPLOADER_JOB_ID, componentName)
+//                .setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY)
+//                .setExtras(extras)
+//                .build();
+//        JobScheduler jobScheduler = (JobScheduler) getSystemService(JOB_SCHEDULER_SERVICE);
+//        jobScheduler.schedule(jobInfo);
+//    }
+
+    private void backUpNotes() {
+        Intent intent = new Intent(this, NoteBackupService.class);
+        intent.putExtra(NoteBackupService.EXTRA_COURSE_ID, NoteBackup.ALL_COURSES);
+        startService(intent);
     }
 
     @SuppressWarnings("StatementWithEmptyBody")
