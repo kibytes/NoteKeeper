@@ -17,7 +17,7 @@ import android.os.Bundle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.cursoradapter.widget.SimpleCursorAdapter;
-// import androidx.loader.content.CursorLoader;
+//import androidx.loader.content.CursorLoader;
 
 import android.os.SystemClock;
 import android.util.Log;
@@ -43,6 +43,8 @@ public class NoteActivity extends AppCompatActivity implements LoaderManager.Loa
     public static final String ORIGINAL_NOTE_COURSE_ID = "com.apps.notekeeper.ORIGINAL_NOTE_COURSE_ID";
     public static final String ORIGINAL_NOTE_TITLE = "com.apps.notekeeper.ORIGINAL_NOTE_TITLE";
     public static final String ORIGINAL_NOTE_TEXT = "com.apps.notekeeper.ORIGINAL_NOTE_TEXT";
+    public static final String NOTE_URI = "com.apps.notekeeper.NOTE_URI";
+
     public static final int ID_NOT_SET = -1;
     private NoteInfo mNote = new NoteInfo(DataManager.getInstance().getCourses().get(0), "", "");;
     private boolean mIsNewNote;
@@ -63,6 +65,7 @@ public class NoteActivity extends AppCompatActivity implements LoaderManager.Loa
     private boolean mCoursesQueryFinished;
     private boolean mNotesQueryFinished;
     private Uri mNoteUri;
+    private ModuleStatusView mViewModuleStatus;
 
     @Override
     protected void onDestroy() {
@@ -93,11 +96,27 @@ public class NoteActivity extends AppCompatActivity implements LoaderManager.Loa
             saveOriginalNoteValues();
         } else {
             restoreOriginalNoteValues(savedInstanceState);
+            String stringNoteUri = savedInstanceState.getString(NOTE_URI);
+            mNoteUri = Uri.parse(stringNoteUri);
         }
         mTextNoteTitle = findViewById(R.id.text_note_title);
         mTextNoteText = findViewById(R.id.text_note_text);
         if(!mIsNewNote)
             getLoaderManager().initLoader(LOADER_NOTES, null, this);
+
+        mViewModuleStatus = findViewById(R.id.module_status);
+        loadModuleStatusValues();
+
+    }
+
+    private void loadModuleStatusValues() {
+        int totalNumberOfModules = 11;
+        int completedNumberOfModules = 7;
+        boolean[] moduleStatus = new boolean[totalNumberOfModules];
+        for(int moduleIndex = 0; moduleIndex < completedNumberOfModules; moduleIndex++)
+            moduleStatus[moduleIndex] = true;
+
+        mViewModuleStatus.setModuleStatus(moduleStatus);
     }
 
     private void loadCourseData() {
@@ -186,6 +205,8 @@ public class NoteActivity extends AppCompatActivity implements LoaderManager.Loa
         outState.putString(ORIGINAL_NOTE_COURSE_ID, mOriginalNoteCourseId);
         outState.putString(ORIGINAL_NOTE_TITLE, mOriginalNoteTitle);
         outState.putString(ORIGINAL_NOTE_TEXT, mOriginalNoteText);
+
+        outState.putString(NOTE_URI, mNoteUri.toString());
     }
 
     private void saveNote() {
@@ -226,7 +247,7 @@ public class NoteActivity extends AppCompatActivity implements LoaderManager.Loa
         mTextNoteTitle.setText(noteTitle);
         mTextNoteText.setText(noteText);
 
-        CourseEventBroadcastHelper.sendEventBroadcast(this, courseId, "Editing Note");
+        // CourseEventBroadcastHelper.sendEventBroadcast(this, courseId, "Editing Note");
 
     }
 

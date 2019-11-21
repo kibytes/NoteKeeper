@@ -1,0 +1,13 @@
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <com.apps.notekeeper.ModuleStatusView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="#ccc"
+        android:paddingLeft="10dp"
+        android:paddingTop="10dp"
+        android:paddingBottom="40dp" />
+
+</FrameLayout>

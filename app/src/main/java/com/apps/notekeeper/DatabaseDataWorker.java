@@ -3,10 +3,6 @@ package com.apps.notekeeper;
 import android.content.ContentValues;
 import android.database.sqlite.SQLiteDatabase;
 
-/**
- * Created by Jim.
- */
-
 public class DatabaseDataWorker {
     private SQLiteDatabase mDb;
 
@@ -20,9 +16,6 @@ public class DatabaseDataWorker {
         insertCourse("basic_three", "3.Training Balance Scale");
         insertCourse("basic_four", "4.Four steps of Learning");
         insertCourse("basic_five", "5.Master the 4 Basics");
-//        insertCourse("swa", "Kiswahili");
-//        insertCourse("chem", "Chemistry");
-//        insertCourse("comp", "Computer Studies");
     }
 
     public void insertSampleNotes() {
@@ -38,10 +31,6 @@ public class DatabaseDataWorker {
 
         insertNote("basic_five", "Why do you master the four basics",
                 "It is required when becoming a master of the L.O.A. to have a really firm grasp");
-//        insertNote("swa", "Ngeli", "Ngeli ni ya genge");
-//
-//        insertNote("chem", "Extraction of Sulphur", "How to extract sulphur at home");
-//        insertNote("comp", "Binary numbers", "Binary numbers are unlike decimal numbers");
     }
 
     private void insertCourse(String courseId, String title) {
