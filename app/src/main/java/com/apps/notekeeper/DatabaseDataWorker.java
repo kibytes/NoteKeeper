@@ -3,10 +3,6 @@ package com.apps.notekeeper;
 import android.content.ContentValues;
 import android.database.sqlite.SQLiteDatabase;
 
-/**
- * Created by Jim.
- */
-
 public class DatabaseDataWorker {
     private SQLiteDatabase mDb;
 
@@ -15,24 +11,26 @@ public class DatabaseDataWorker {
     }
 
     public void insertCourses() {
-        insertCourse("android_intents", "Android Programming with Intents");
-        insertCourse("android_async", "Android Async Programming and Services");
-        insertCourse("java_lang", "Java Fundamentals: The Java Language");
-        insertCourse("java_core", "Java Fundamentals: The Core Platform");
+        insertCourse("basic_one", "1.Who do you listen to?");
+        insertCourse("basic_two", "2.Teachability Index");
+        insertCourse("basic_three", "3.Training Balance Scale");
+        insertCourse("basic_four", "4.Four steps of Learning");
+        insertCourse("basic_five", "5.Master the 4 Basics");
     }
 
     public void insertSampleNotes() {
-        insertNote("android_intents", "Dynamic intent resolution", "Wow, intents allow components to be resolved at runtime");
-        insertNote("android_intents", "Delegating intents", "PendingIntents are powerful; they delegate much more than just a component invocation");
+        insertNote("basic_one", "Who do you listen to and why",
+                "You listen to people whao have what you want.");
+        insertNote("basic_two", "How do you determine how teachable you are",
+                "There are two variables that are used to determine my teachablitiy");
 
-        insertNote("android_async", "Service default threads", "Did you know that by default an Android Service will tie up the UI thread?");
-        insertNote("android_async", "Long running operations", "Foreground Services can be tied to a notification icon");
+        insertNote("basic_three", "What is the Training Balance Scale",
+                "It describes the focus areas that you have when trying to reach a goal");
+        insertNote("basic_four", "What is learning",
+                "Learning is being able to demonstrate an application of a new concept");
 
-        insertNote("java_lang", "Parameters", "Leverage variable-length parameter lists?");
-        insertNote("java_lang", "Anonymous classes", "Anonymous classes simplify implementing one-use types");
-
-        insertNote("java_core", "Compiler options", "The -jar option isn't compatible with with the -cp option");
-        insertNote("java_core", "Serialization", "Remember to include SerialVersionUID to assure version compatibility");
+        insertNote("basic_five", "Why do you master the four basics",
+                "It is required when becoming a master of the L.O.A. to have a really firm grasp");
     }
 
     private void insertCourse(String courseId, String title) {
